@@ -41,7 +41,7 @@ paths:
                   result:
                     $ref: "#/components/schemas/Movie"
   
-  /v1/movies/{id}:
+  /v1/movies/{id}/:
     get:
       description: ""
       parameters:

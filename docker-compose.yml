@@ -1,0 +1,44 @@
+version: "3"
+
+services:
+  database:
+    container_name: movies_database
+    image: postgres:13
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./schema_design/db_schema.sql:/docker-entrypoint-initdb.d/10-init.sql
+      - movies_database_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=password
+  web:
+    container_name: movies_admin
+    build:
+      context: .
+      dockerfile: ./movies_admin/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./movies_admin/.env
+    volumes:
+      - ./movies_admin:/app
+    entrypoint:
+      - "python"
+      - "entrypoint.py"
+    restart: always
+  transfer:
+    container_name: movies_transfer
+    restart: on-failure
+    build:
+      context: ./sqlite_to_postgres
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./sqlite_to_postgres:/app
+    env_file:
+      - ./sqlite_to_postgres/.env
+    entrypoint:
+      - "python"
+      - "load_data.py"
+
+volumes:
+  movies_database_data:
