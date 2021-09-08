@@ -21,7 +21,7 @@ class PersonsInline(admin.TabularInline):
 
 
 class GenresInline(admin.TabularInline):
-    model = Film.genres.through
+    model = Film.genre_set.through
     verbose_name = 'Жанр'
     verbose_name_plural = 'Жанры'
     extra = 0

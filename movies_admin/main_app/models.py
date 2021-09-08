@@ -51,7 +51,7 @@ class Film(TimeStampedMixin):
     file_path = models.FileField('Файл', upload_to='films/', blank=True)
     rating = models.FloatField('Рейтинг', validators=[MinValueValidator(0), MaxValueValidator(10)], blank=True)
     type = models.CharField('Тип', max_length=7, choices=FilmType.choices, default=FilmType.MOVIE)
-    genres = models.ManyToManyField(Genre, through='GenresFilms', blank=True)
+    genre_set = models.ManyToManyField(Genre, through='GenresFilms', blank=True)
 
     def __str__(self):
         return self.title
@@ -65,7 +65,7 @@ class Film(TimeStampedMixin):
 class Person(TimeStampedMixin):
     id = models.UUIDField('UUID', primary_key=True, default=uuid.uuid4)
     name = models.CharField('Имя', max_length=127)
-    films = models.ManyToManyField(Film, verbose_name='Фильмы', related_name='persons', through='PersonsFilms')
+    films = models.ManyToManyField(Film, verbose_name='Фильмы', through='PersonsFilms')
 
     def __str__(self):
         return self.name
