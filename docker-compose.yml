@@ -41,6 +41,7 @@ services:
     depends_on:
       - web
   nginx:
+    container_name: movies_proxy
     restart: always
     image: nginx:1.19.2
     volumes:
