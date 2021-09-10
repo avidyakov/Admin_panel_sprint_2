@@ -1,5 +1,5 @@
 from django.contrib.postgres.aggregates import ArrayAgg
-from django.db.models import F, Subquery, OuterRef
+from django.db.models import F, Q
 from django.http import JsonResponse
 from django.views.generic.detail import BaseDetailView
 from django.views.generic.list import BaseListView
@@ -9,21 +9,19 @@ from main_app.models import Film, PersonsFilms
 
 class MoviesAPIMixin:
     model = Film
-    http_method_names = ('get', )
+    http_method_names = ('get',)
 
     def get_queryset(self):
         values = ('id', 'title', 'creation_date', 'rating', 'type')
-        all_persons = PersonsFilms.objects.filter(movie=OuterRef('id'))
-        actors = all_persons.filter(part=PersonsFilms.PersonRole.ACTOR)
-        writers = all_persons.filter(part=PersonsFilms.PersonRole.WRITER)
-        directors = all_persons.filter(part=PersonsFilms.PersonRole.DIRECTOR)
-
         object_list = super().get_queryset().values(*values).annotate(
             description=F('plot'),
-            genres=ArrayAgg(F('genre_set__name'), distinct=True),
-            actors=ArrayAgg(Subquery(actors.values('person__name')[:1]), distinct=True),
-            writers=ArrayAgg(Subquery(writers.values('person__name')[:1]), distinct=True),
-            directors=ArrayAgg(Subquery(directors.values('person__name')[:1]), distinct=True)
+            actors=ArrayAgg(F('person__name'), distinct=True,
+                            filter=Q(personsfilms__part=PersonsFilms.PersonRole.ACTOR)),
+            writers=ArrayAgg(F('person__name'), distinct=True,
+                             filter=Q(personsfilms__part=PersonsFilms.PersonRole.WRITER)),
+            directors=ArrayAgg(F('person__name'), distinct=True,
+                               filter=Q(personsfilms__part=PersonsFilms.PersonRole.DIRECTOR)),
+            genres=ArrayAgg(F('genre_set__name'), distinct=True)
         )
         return object_list
 
