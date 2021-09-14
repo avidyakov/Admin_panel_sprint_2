@@ -3,7 +3,7 @@ version: "3"
 services:
   database:
     container_name: movies_database
-    image: postgres:13
+    image: postgres:13.4-alpine
     volumes:
       - ./schema_design/db_schema.sql:/docker-entrypoint-initdb.d/10-init.sql
       - movies_database_data:/var/lib/postgresql/data
@@ -19,31 +19,15 @@ services:
       - ./movies_admin/.env
     volumes:
       - ./movies_admin:/app
-    entrypoint:
-      - "python"
-      - "entrypoint.py"
     restart: always
     depends_on:
       - database
-  transfer:
-    container_name: movies_transfer
-    restart: on-failure
-    build:
-      context: ./sqlite_to_postgres
-      dockerfile: ./Dockerfile
-    volumes:
-      - ./sqlite_to_postgres:/app
-    env_file:
-      - ./sqlite_to_postgres/.env
-    entrypoint:
-      - "python"
-      - "load_data.py"
-    depends_on:
-      - web
+    expose:
+      - "8000"
   nginx:
     container_name: movies_proxy
     restart: always
-    image: nginx:1.19.2
+    image: nginx:1.20.1-alpine
     volumes:
       - ./src/nginx.conf:/etc/nginx/nginx.conf
       - ./src/site.conf:/etc/nginx/conf.d/site.conf
