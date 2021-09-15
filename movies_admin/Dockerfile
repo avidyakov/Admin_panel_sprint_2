@@ -1,5 +1,4 @@
-FROM python:3.9-slim
-# Где здесь патч?)
+FROM python:3.9.7-slim
 
 WORKDIR /app
 
